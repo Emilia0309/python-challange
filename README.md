@@ -1,4 +1,4 @@
-This Repo contains the following analysis :
+This Repository contains the following analysis :
 
 **Budget data analysis with the following **:
 			
