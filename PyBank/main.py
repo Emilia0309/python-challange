@@ -1,16 +1,25 @@
 
-
 import csv
+from pathlib import Path
 from datetime import datetime
+import os
 
-# Load data set
-file_url = r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyBank\Resources\budget_data.csv'
+
+data_file = Path('OneDrive')/'Desktop'/'Pro' / 'python-challange' / 'PyBank'/ 'Resources' / 'budget_data.csv'
+
+
+
+# Print paths for debugging
+print(f"Data file path: {data_file.resolve()}")
 
 try:
-    # Open and read the CSV file
-    with open(file_url, newline='') as csvfile:
+    # Read the CSV file
+    with open(data_file, newline='') as csvfile:
         reader = csv.reader(csvfile)
-        
+
+
+
+
         # Skip the header row
         header = next(reader)
         
@@ -71,10 +80,16 @@ try:
 
         # Print results to the terminal
         print(results)
-
+        
+         # Define path for output file
+        output_file = Path('OneDrive')/'Desktop'/'Pro' / 'python-challange' / 'PyBank'/ 'analysis' / 'financial_analysis.txt'
+       
+        
         # Export results to a text file
-        with open(r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyBank\analysis\financial_analysis.txt', 'w') as file:
+        with open(output_file, 'w') as file:
             file.write(results)
+
+
 
 except FileNotFoundError:
     print("The file was not found. Please check the file path.")

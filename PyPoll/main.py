@@ -1,11 +1,18 @@
 import csv
+from pathlib import Path
+import os
 
-# Load the dataset
-file_url = r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyPoll\Resources\election_data.csv'  # Replace with the actual path to your CSV file
+
+data_file = Path('OneDrive')/'Desktop'/'Pro' / 'python-challange' / 'PyPoll'/ 'Resources' / 'election_data.csv'
+
+
+
+# Print paths for debugging
+print(f"Data file path: {data_file.resolve()}")
 
 try:
     # Read the CSV file
-    with open(file_url, newline='') as csvfile:
+    with open(data_file, newline='') as csvfile:
         reader = csv.reader(csvfile)
         
         # Skip the header row
@@ -58,12 +65,16 @@ try:
         # Print results to the terminal
         print(results)
 
+        # Define path for output file
+        output_file = Path('OneDrive')/'Desktop'/'Pro' / 'python-challange' / 'PyPoll'/ 'analysis' / 'election_results.txt'
+       
+        
         # Export results to a text file
-        with open(r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyPoll\analysis\election_results.txt', 'w') as file:
+        with open(output_file, 'w') as file:
             file.write(results)
 
 except FileNotFoundError:
-    print("The file was not found. Please check the file path.")
+    print(f"The file {data_file} was not found. Please check the file path.")
 except ValueError as ve:
     print(f"ValueError: {ve}")
 except Exception as e:
