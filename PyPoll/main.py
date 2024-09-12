@@ -1,19 +1,20 @@
 import csv
+import requests
+from datetime import datetime
+from io import StringIO
 from pathlib import Path
-import os
 
+# Define the URL to fetch the CSV file
+url = 'https://raw.githubusercontent.com/Emilia0309/python-challange/main/PyPoll/Resources/election_data.csv'
 
-data_file = Path('OneDrive')/'Desktop'/'Pro' / 'python-challange' / 'PyPoll'/ 'Resources' / 'election_data.csv'
-
-
-
-# Print paths for debugging
-print(f"Data file path: {data_file.resolve()}")
 
 try:
-    # Read the CSV file
-    with open(data_file, newline='') as csvfile:
-        reader = csv.reader(csvfile)
+    # Fetch the CSV file from the URL
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        csv_file = StringIO(response.text)
+        reader = csv.reader(csv_file)
         
         # Skip the header row
         header = next(reader)
@@ -73,9 +74,8 @@ try:
         with open(output_file, 'w') as file:
             file.write(results)
 
-except FileNotFoundError:
-    print(f"The file {data_file} was not found. Please check the file path.")
-except ValueError as ve:
-    print(f"ValueError: {ve}")
+    else:
+        print("Failed to fetch the CSV file.")
+
 except Exception as e:
-    print(f"An unexpected error occurred: {e}")
+    print(f"An error occurred: {e}")
