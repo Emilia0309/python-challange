@@ -1,37 +1,46 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
-import pandas as pd
+import csv
 
 # Load the dataset
-file_url = (r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyPoll\Resources\election_data.csv')  # Replace with the actual URL or path to your CSV file
+file_url = r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyPoll\Resources\election_data.csv'  # Replace with the actual path to your CSV file
 
 try:
-    # Read the CSV file into a DataFrame
-    df = pd.read_csv(file_url)
-    
-    # Check if DataFrame is empty
-    if df.empty:
-        print("The DataFrame is empty. Please check the CSV file.")
-    else:
-        # Calculate the total number of votes cast
-        total_votes = df.shape[0]
+    # Read the CSV file
+    with open(file_url, newline='') as csvfile:
+        reader = csv.reader(csvfile)
         
-        # Get the list of candidates who received votes
-        candidates = df['Candidate'].unique()
+        # Skip the header row
+        header = next(reader)
         
-        # Calculate the total number of votes each candidate won
-        votes_per_candidate = df['Candidate'].value_counts()
+        if 'Ballot ID' not in header or 'Candidate' not in header:
+            raise ValueError("The required 'Ballot ID' or 'Candidate' column is missing from the data.")
+
+        # Create a dictionary to store vote counts for each candidate
+        vote_counts = {}
+
+        total_votes = 0  # Counter for total number of votes
         
+        # Iterate through each row
+        for row in reader:
+            total_votes += 1
+            candidate = row[2].strip()  # Assuming the 'Candidate' is in the 3rd column
+            
+            if candidate in vote_counts:
+                vote_counts[candidate] += 1
+            else:
+                vote_counts[candidate] = 1
+        
+        if total_votes == 0:
+            raise ValueError("No votes found in the CSV file.")
+        
+        # Prepare the list of candidates
+        candidates = list(vote_counts.keys())
+
         # Calculate the percentage of votes each candidate won
-        percentage_per_candidate = (votes_per_candidate / total_votes) * 100
+        percentage_per_candidate = {candidate: (votes / total_votes) * 100 for candidate, votes in vote_counts.items()}
         
         # Determine the winner of the election based on popular vote
-        winner = votes_per_candidate.idxmax()
-        
+        winner = max(vote_counts, key=vote_counts.get)
+
         # Prepare results for printing
         results = (
             f"Total number of votes cast: {total_votes}\n"
@@ -40,24 +49,22 @@ try:
         
         results += "Vote Counts and Percentages:\n"
         for candidate in candidates:
-            vote_count = votes_per_candidate[candidate]
+            vote_count = vote_counts[candidate]
             vote_percentage = percentage_per_candidate[candidate]
-            results += (f"{candidate}: {vote_count} votes ({vote_percentage:.2f}%)\n")
+            results += f"{candidate}: {vote_count} votes ({vote_percentage:.2f}%)\n"
         
         results += f"\nThe winner of the election is: {winner}\n"
-        
-          # Print results to the terminal
-    print(results)
 
-    # Export results to a text file
-  
-    with open(r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyPoll\analysis\election_results.txt', 'w') as file:
-        file.write(results)
+        # Print results to the terminal
+        print(results)
 
-except pd.errors.EmptyDataError:
-    print("No columns to parse from file. The CSV file might be empty or incorrectly formatted.")
-except pd.errors.ParserError:
-    print("Error parsing the CSV file. Please check the file format.")
+        # Export results to a text file
+        with open(r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyPoll\analysis\election_results.txt', 'w') as file:
+            file.write(results)
+
+except FileNotFoundError:
+    print("The file was not found. Please check the file path.")
+except ValueError as ve:
+    print(f"ValueError: {ve}")
 except Exception as e:
     print(f"An unexpected error occurred: {e}")
-

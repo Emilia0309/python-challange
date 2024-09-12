@@ -1,89 +1,84 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[44]:
 
 
-import pandas as pd
+import csv
+from datetime import datetime
 
-# load data set
-file_url = (r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyBank\Resources\budget_data.csv')
+# Load data set
+file_url = r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyBank\Resources\budget_data.csv'
 
 try:
-    # Load the dataset
-    df = pd.read_csv(file_url)
-    
-    # Print column names and first few rows for inspection
-    #print("Columns:", df.columns)
-    #print("First few rows:\n", df.head())
+    # Open and read the CSV file
+    with open(file_url, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        
+        # Skip the header row
+        header = next(reader)
+        
+        if 'Date' not in header or 'Profit/Losses' not in header:
+            raise ValueError("The required 'Date' or 'Profit/Losses' column is missing from the data.")
 
-    # stripping whitespace
-    df.columns = df.columns.str.strip()
-    
-    # Check if 'Date' column exists
-    if 'Date' not in df.columns:
-        raise ValueError("The 'Date' column is missing from the data.")
+        data = []
+        for row in reader:
+            date_str = row[0].strip()
+            profit_losses_str = row[1].strip()
 
-   
-    df['Date'] = pd.to_datetime(df['Date'], format='%b-%y', errors='coerce')
+            try:
+                # Parse the date
+                date = datetime.strptime(date_str, '%b-%y')
 
-    # Check for any NaT values
-    if df['Date'].isna().any():
-        print("Some dates could not be parsed:")
-        print(df[df['Date'].isna()])
+                # Convert profit/losses to integer
+                profit_losses = int(profit_losses_str)
+            except ValueError as ve:
+                print(f"Error parsing row: {row}. Error: {ve}")
+                continue
 
-    # Sort data by date
-    df = df.sort_values(by='Date')
-    
-    # Calculate the total number of months
-    total_months = df.shape[0]
-    
-    # Calculate the net total amount of "Profit/Losses"
-    net_total = df['Profit/Losses'].sum()
-    
-    # Calculate the changes in "Profit/Losses"
-    df['Change'] = df['Profit/Losses'].diff()
-    
-    # Calculate the average change in "Profit/Losses"
-    average_change = df['Change'].mean()
-    
-    # Find the greatest increase in profits
-    greatest_increase = df.loc[df['Change'].idxmax()]
-    
-    # Find the greatest decrease in profits
-    greatest_decrease = df.loc[df['Change'].idxmin()]
-    
-    # Prepare results for printing and saving
-    results = (
-        f"Total number of months: {total_months}\n"
-        f"Net total amount of 'Profit/Losses': ${net_total:,.2f}\n"
-        f"Average change in 'Profit/Losses': ${average_change:,.2f}\n"
-        f"Greatest increase in profits: {greatest_increase['Date'].strftime('%b-%Y')} (${greatest_increase['Change']:,.2f})\n"
-        f"Greatest decrease in profits: {greatest_decrease['Date'].strftime('%b-%Y')} (${greatest_decrease['Change']:,.2f})"
-    )
+            data.append((date, profit_losses))
 
-    # Print results to the terminal
-    print(results)
+        if len(data) == 0:
+            raise ValueError("No valid data found in the CSV file.")
 
-    # Export results to a text file
-  
-    with open(r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyBank\analysis\financial_analysis.txt', 'w') as file:
-       file.write(results)
+        # Sort data by date
+        data.sort(key=lambda x: x[0])
 
+        # Calculate the total number of months
+        total_months = len(data)
 
+        # Calculate the net total amount of "Profit/Losses"
+        net_total = sum([row[1] for row in data])
 
-except pd.errors.EmptyDataError:
-   print("No columns to parse from file. The CSV file might be empty or incorrectly formatted.")
-except pd.errors.ParserError:
-    print("Error parsing the CSV file. Please check the file format.")
+        # Calculate the changes in "Profit/Losses"
+        changes = [data[i][1] - data[i-1][1] for i in range(1, total_months)]
+
+        # Calculate the average change in "Profit/Losses"
+        average_change = sum(changes) / len(changes) if len(changes) > 0 else 0
+
+        # Find the greatest increase in profits
+        greatest_increase_index = changes.index(max(changes)) + 1
+        greatest_increase = data[greatest_increase_index]
+
+        # Find the greatest decrease in profits
+        greatest_decrease_index = changes.index(min(changes)) + 1
+        greatest_decrease = data[greatest_decrease_index]
+
+        # Prepare results for printing and saving
+        results = (
+            f"Total number of months: {total_months}\n"
+            f"Net total amount of 'Profit/Losses': ${net_total:,.2f}\n"
+            f"Average change in 'Profit/Losses': ${average_change:,.2f}\n"
+            f"Greatest increase in profits: {greatest_increase[0].strftime('%b-%Y')} (${max(changes):,.2f})\n"
+            f"Greatest decrease in profits: {greatest_decrease[0].strftime('%b-%Y')} (${min(changes):,.2f})"
+        )
+
+        # Print results to the terminal
+        print(results)
+
+        # Export results to a text file
+        with open(r'C:\Users\amyee\OneDrive\Desktop\Pro\python-challange\PyBank\analysis\financial_analysis.txt', 'w') as file:
+            file.write(results)
+
+except FileNotFoundError:
+    print("The file was not found. Please check the file path.")
 except ValueError as ve:
-   print(f"ValueError: {ve}")
+    print(f"ValueError: {ve}")
 except Exception as e:
-     print(f"An unexpected error occurred: {e}")
-
-
-# In[ ]:
-
-
-
-
+    print(f"An unexpected error occurred: {e}")
