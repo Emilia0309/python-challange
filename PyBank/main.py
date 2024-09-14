@@ -1,21 +1,24 @@
-
 import csv
-import requests
-from datetime import datetime
-from io import StringIO
 from pathlib import Path
+from datetime import datetime
+import os
 
-# Define the URL to fetch the CSV file
-url = 'https://raw.githubusercontent.com/Emilia0309/python-challange/main/PyBank/Resources/budget_data.csv'
+
+data_file = Path('OneDrive')/'Desktop'/'Pro' / 'python-challange' / 'PyBank'/ 'Resources' / 'budget_data.csv'
+
+
+
+# Print paths for debugging
+print(f"Data file path: {data_file.resolve()}")
 
 try:
-    # Fetch the CSV file from the URL
-    response = requests.get(url)
-    
-    if response.status_code == 200:
-        csv_file = StringIO(response.text)
-        reader = csv.reader(csv_file)
-        
+    # Read the CSV file
+    with open(data_file, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+
+
+
+
         # Skip the header row
         header = next(reader)
         
@@ -76,7 +79,7 @@ try:
 
         # Print results to the terminal
         print(results)
-
+        
          # Define path for output file
         output_file = Path('OneDrive')/'Desktop'/'Pro' / 'python-challange' / 'PyBank'/ 'analysis' / 'financial_analysis.txt'
        
@@ -84,10 +87,12 @@ try:
         # Export results to a text file
         with open(output_file, 'w') as file:
             file.write(results)
-        
 
-    else:
-        print("Failed to fetch the CSV file.")
 
+
+except FileNotFoundError:
+    print("The file was not found. Please check the file path.")
+except ValueError as ve:
+    print(f"ValueError: {ve}")
 except Exception as e:
-    print(f"An error occurred: {e}")
+    print(f"An unexpected error occurred: {e}")
