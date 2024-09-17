@@ -4,9 +4,14 @@ from pathlib import Path
 from datetime import datetime
 import os
 
+# Change the working directory to where the CSV file is located
+os.chdir('C:/Users/amyee/OneDrive/Desktop/Pro/python-challange/PyPoll')
 
-data_file = Path('OneDrive')/'Desktop'/'Pro' / 'python-challange' / 'PyPoll'/ 'Resources' / 'election_data.csv'
+# Define the relative path to the data file
+data_file = Path('Resources/election_data.csv')
 
+# Print paths for debugging
+print(f"Data file path: {data_file.resolve()}")
 
 
 # Print paths for debugging
